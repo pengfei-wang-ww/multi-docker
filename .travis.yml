@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t pengfeiwangww/multi-docker-react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run pengfeiwangww/multi-docker-react-test npm run test -- --coverage
+
+after_success:
+  - docker build -t pengfeiwangww/multi-docker-react ./client
+  - docker build -t pengfeiwangww/multi-docker-nginx ./nginx
+  - docker build -t pengfeiwangww/multi-docker-server ./server
+  - docker build -t pengfeiwangww/multi-docker-worker ./worker
+  # Log in to the docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # push images
+  - docker push pengfeiwangww/multi-docker-react
+  - docker push pengfeiwangww/multi-docker-nginx
+  - docker push pengfeiwangww/multi-docker-server
+  - docker push pengfeiwangww/multi-docker-worker
